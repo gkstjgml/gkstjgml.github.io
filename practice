@@ -1,0 +1,212 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  final clubs = getMockClubs();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      navigatorKey: MyApp.navigatorKey,
+      title: 'p',
+      home: Scaffold(
+        appBar: AppBar(
+          
+    title: 
+    const Padding(
+      padding:EdgeInsets.all(15),
+      child:Text('한가람고등학교'),
+    ),
+          titleTextStyle: TextStyle(fontSize: 30, color: Colors.white),
+          backgroundColor: Color.fromRGBO(77, 0, 193, 1),
+        ),
+        backgroundColor: Color.fromARGB(40, 43, 0, 255),
+        body: Row(
+          children: <Widget>[
+            NavigationDrawer(), // 네비게이션 드로어 추가
+            Expanded(
+              child: Column(
+                children: <Widget>[
+                  Card(
+                    margin: EdgeInsets.only(left: 56, top: 100),
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text(
+                        "동아리 축제 예약",
+                        style: TextStyle(fontSize: 20, color: Colors.pink),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  InkWell(
+                    onTap: () {
+                      _showAlertDialog(MyApp.navigatorKey.currentContext!);
+                    },
+                    child: Image.asset('images/heart.png', width: 100),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: clubs.length,
+                      itemBuilder: (context, index) {
+                        return ClubWidget(club: clubs[index]);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAlertDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('주의'),
+          content: Text('예약 가능 시간'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('확인'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class ClubWidget extends StatefulWidget {
+  final Club club;
+
+  ClubWidget({required this.club});
+
+  @override
+  _ClubWidgetState createState() => _ClubWidgetState();
+}
+
+class _ClubWidgetState extends State<ClubWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ExpansionTile(
+        title: Text(widget.club.name),
+        children: widget.club.bookings.map((booking) {
+          return ListTile(
+            title: Text(booking.time),
+            trailing: IconButton(
+              icon: Icon(booking.isBooked ? Icons.lock : Icons.lock_open),
+              onPressed: () {
+                setState(() {
+                  booking.isBooked = !booking.isBooked;
+                });
+              },
+            ),
+            onTap: () {
+              setState(() {
+                booking.isBooked = !booking.isBooked;
+              });
+            },
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+
+class Club {
+  String name;
+  List<Booking> bookings;
+
+  Club(this.name, this.bookings);
+}
+
+class Booking {
+  String time;
+  bool isBooked;
+
+  Booking(this.time, this.isBooked);
+}
+
+List<Club> getMockClubs() {
+  return [
+    Club("overflow", [
+      Booking("09:00", true),
+      Booking("10:00", false),
+      Booking("11:00", true),
+    ]),
+    Club("F2", [
+      Booking("09:00", false),
+      Booking("10:00", true),
+      Booking("11:00", false),
+    ]),
+    Club("다독다독", [
+      Booking("09:00", true),
+      Booking("10:00", true),
+      Booking("11:00", true),
+    ]),
+    Club("축구부", [
+      Booking("09:00", true),
+      Booking("10:00", true),
+      Booking("11:00", true),
+    ]),
+  ];
+}
+
+class NavigationDrawer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      width: 200,
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          ListTile(
+            title: Text('Home'),
+            onTap: () {
+              // Navigate to home page (current page)
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: Text('Other Page'),
+            onTap: () {
+              // Navigate to other page
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => OtherPage()),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class OtherPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('두번째 페이지'),
+      ),
+      body: Center(
+        child: Text('예약 현황'),
+      ),
+    );
+  }
+}
